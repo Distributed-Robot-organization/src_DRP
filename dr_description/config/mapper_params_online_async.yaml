@@ -19,7 +19,7 @@ slam_toolbox:
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
     # will use pose
-    map_file_name: /home/dev/dev_ws/my_map_serial
+    map_file_name: /home/ruben/ws_workspaces/ws_DRP/src_DRP/maps/plane_2_map/map_slam_2/plane_2.yaml
     # map_start_pose: [0.0, 0.0, 0.0]
     map_start_at_dock: true
 
