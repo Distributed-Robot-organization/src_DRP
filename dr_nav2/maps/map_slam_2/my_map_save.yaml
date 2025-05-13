@@ -1,7 +1,7 @@
-image: plane_1.pgm
+image: my_map_save.pgm
 mode: trinary
 resolution: 0.05
-origin: [-2.13, -0.631, 0]
+origin: [-2.77, -2.76, 0]
 negate: 0
 occupied_thresh: 0.65
 free_thresh: 0.25
