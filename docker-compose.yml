@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  distributed_project:
+    build:
+      context: .  
+      dockerfile: Dockerfile  
+    container_name: ros2_distributed_project
+    stdin_open: true  
+    tty: true         
+    network_mode: bridge
+    volumes:
+      - ./:/ros2_ws/src_DRP
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
+    environment:
+      - DISPLAY=${DISPLAY}  
+      - LIBGL_ALWAYS_INDIRECT=0
+      - QT_X11_NO_MITSHM=1
+    privileged: true  
+    command: bash
