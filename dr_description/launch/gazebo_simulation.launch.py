@@ -12,13 +12,13 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     package_name='dr_description' 
-    x_pose = LaunchConfiguration('x_pose', default='3.0')
-    y_pose = LaunchConfiguration('y_pose', default='3.0')
+    x_pose = LaunchConfiguration('x_pose', default='2.0')
+    y_pose = LaunchConfiguration('y_pose', default='2.0')
     
     world = os.path.join(
         get_package_share_directory(package_name),
         'worlds',
-        'plane_3.world'
+        'plane_5.world'
     )
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
