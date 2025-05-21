@@ -1,7 +1,7 @@
 FROM osrf/ros:humble-desktop-full
 
-# Create a new user 'rosuser' with a home directory
-# Install essential ROS 2 and Python tools
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
     apt-get install -y \
     python3-pip \
@@ -24,6 +24,9 @@ RUN apt-get update && \
     ros-humble-ros-gz* \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-ros2-control \
+    ros-humble-twist-mux \
+    ros-humble-robot-state-publisher \
+    ros-humble-gazebo-ros2-control \
     ros-humble-ros2-controllers && \
     rm -rf /var/lib/apt/lists/*
 
@@ -34,7 +37,9 @@ WORKDIR /ros2_ws
 # RUN mkdir -p ros2_ws/src_DRP
 # COPY src_DRP ros2_ws/src_DRP
 # Source the ROS 2 setup script in the user's bashrc
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source /usr/share/gazebo/setup.sh" >> ~/.bashrc
 
 
 # Default command to run when the container starts
