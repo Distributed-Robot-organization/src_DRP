@@ -44,7 +44,8 @@ def generate_launch_description():
         }.items()
     )
 
-    # Include the navigation launch
+    nav2_params_path = os.path.join(pkg_dir, 'config', 'nav2_params.yaml')
+
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(
@@ -55,7 +56,8 @@ def generate_launch_description():
         ]),
         launch_arguments={
             'use_sim_time': LaunchConfiguration('use_sim_time'),
-            'map_subscribe_transient_local': LaunchConfiguration('map_subscribe_transient_local')
+            'map_subscribe_transient_local': LaunchConfiguration('map_subscribe_transient_local'),
+            'params_file': nav2_params_path
         }.items()
     )
 

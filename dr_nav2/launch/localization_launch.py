@@ -25,6 +25,9 @@ from launch_ros.actions import Node
 from launch_ros.descriptions import ComposableNode, ParameterFile
 from nav2_common.launch import RewrittenYaml
 
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from launch_ros.actions import Node
+
 
 def generate_launch_description():
     # Get the launch directory
@@ -84,7 +87,7 @@ def generate_launch_description():
 
     declare_params_file_cmd = DeclareLaunchArgument(
         'params_file',
-        default_value=os.path.join(bringup_dir, 'config', 'nav2_params.yaml'),
+        default_value=os.path.join(bringup_dir, 'nav2_params.yaml'),
         description='Full path to the ROS2 parameters file to use for all launched nodes')
 
     declare_autostart_cmd = DeclareLaunchArgument(
@@ -167,6 +170,22 @@ def generate_launch_description():
                              'node_names': lifecycle_nodes}]),
         ],
     )
+    
+    config_path = os.path.join(
+        get_package_share_directory('dr_configurations'),
+        'robottino_behavior.yaml'
+    )
+
+    initial_pose_pub = Node(
+        package='dr_nav2',
+        executable='initial_pose_publisher.py',
+        name='initial_pose_publisher',
+        output='screen',
+        parameters=[{
+            'config_path': config_path
+        }]
+    )
+
 
     # Create the launch description and populate
     ld = LaunchDescription()
@@ -188,5 +207,6 @@ def generate_launch_description():
     # Add the actions to launch all of the localiztion nodes
     ld.add_action(load_nodes)
     ld.add_action(load_composable_nodes)
+    ld.add_action(initial_pose_pub)
 
     return ld
