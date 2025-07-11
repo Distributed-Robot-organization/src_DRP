@@ -14,11 +14,6 @@ find_package(geometry_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/DetectedSurfaces.msg"
   "msg/DetectedObjects.msg"
-  "msg/FreezeScene.msg"
-  "msg/InferenceResult.msg"
-  "msg/Yolov8Inference.msg"
-  "msg/PoseKeypoint.msg"
-  "msg/PoseResult.msg"
   "msg/SegmentationResult.msg"
   "msg/Yolov8Segmentation.msg"
   "msg/ObjectDetectionBox.msg"
@@ -27,9 +22,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ObjectInfo.msg"
   "msg/ObjectInfoArray.msg"
 
-  "srv/AllowCollision.srv"
-  "srv/AttachObject.srv"
-  "srv/GetObjectInfo.srv"
   DEPENDENCIES builtin_interfaces geometry_msgs std_msgs
 )
 

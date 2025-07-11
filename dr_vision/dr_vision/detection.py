@@ -49,18 +49,24 @@ class ObjectDetectionNode(Node):
         self.model = YOLO(model_path)
         
         #subscribe to RGB and depth images
+        self.declare_parameter("rgb_image_topic", "camera/image_raw")
+        self.declare_parameter("depth_image_topic", "camera/depth/image_raw")
+        rgb_topic = self.get_parameter("rgb_image_topic").get_parameter_value().string_value
+        depth_topic = self.get_parameter("depth_image_topic").get_parameter_value().string_value
+
         self.rgb_subscription = self.create_subscription(
             Image,
-            'camera/image_raw',
+            rgb_topic,
             self.rgb_callback,
             qos_profile
         )
         self.depth_subscription = self.create_subscription(
             Image,
-            'camera/depth/image_raw',
+            depth_topic,
             self.depth_callback,
             qos_profile
         )
+
         
         #publish the detection results
         self.image_publisher = self.create_publisher(Image, 'dr_vision/yolo_detection_image', 1)

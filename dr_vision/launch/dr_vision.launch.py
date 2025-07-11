@@ -15,7 +15,11 @@ def generate_launch_description():
         package='dr_vision',
         executable='detection.py',  
         name='object_detection_node',
-        output='screen',   
+        output='screen',
+        parameters=[{
+            'rgb_image_topic': 'camera/image_raw',
+            'depth_image_topic': 'camera/depth/image_raw'
+        }]
     )
     
     return LaunchDescription([
