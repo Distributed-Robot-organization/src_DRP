@@ -3,16 +3,13 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
+from std_msgs.msg import Bool
 from cv_bridge import CvBridge
 import cv2
 import os
 import threading
 import time
 from datetime import datetime
-import select
-import sys
-import termios
-import tty
 
 class ImageCapture(Node):
     def __init__(self):
@@ -21,84 +18,63 @@ class ImageCapture(Node):
         self.current_image = None
         self.capturing = False
         self.save_dir = os.path.join("..", "data_images")
-        
-        # Crea directory e subscriber
         os.makedirs(self.save_dir, exist_ok=True)
+
+        # Subscribers
         self.create_subscription(Image, 'scanner/image_raw', self.image_callback, 10)
-        
-        print("Script avviato! Premi 'B' per acquisire 10 immagini, 'Q' per uscire")
-        
+        self.create_subscription(Bool, 'capture_trigger', self.trigger_callback, 10)
+
+        self.get_logger().info("Node started. Publish 'true' to /capture_trigger to start image capture.")
+
     def image_callback(self, msg):
-        """Callback per ricevere le immagini dal topic ROS"""
+        """Callback to store the latest image from the topic."""
         try:
             self.current_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except Exception as e:
-            print(f"Errore conversione immagine: {e}")
-    
+            self.get_logger().error(f"Image conversion error: {e}")
+
+    def trigger_callback(self, msg: Bool):
+        """Callback to start image acquisition when trigger is received."""
+        if msg.data:
+            threading.Thread(target=self.capture_sequence, daemon=True).start()
+
     def capture_sequence(self):
-        """Acquisisce una sequenza di 10 immagini, una ogni secondo"""
+        """Captures a sequence of 10 images."""
         if self.capturing:
-            return print("Acquisizione già in corso...")
-        
+            self.get_logger().warn("Capture already in progress.")
+            return
+
         if self.current_image is None:
-            return print("Nessuna immagine disponibile. Verifica che la fotocamera sia attiva.")
-        
+            self.get_logger().warn("No image available. Check if the camera is publishing.")
+            return
+
         self.capturing = True
-        print("Acquisizione di 10 immagini in corso...")
+        self.get_logger().info("Starting capture of 10 images...")
         session_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         for i in range(10):
             if self.current_image is not None:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
                 filename = f"image_{session_timestamp}_{i+1:02d}_{timestamp}.jpg"
                 filepath = os.path.join(self.save_dir, filename)
                 cv2.imwrite(filepath, self.current_image)
-                print(f"Salvata {i+1}/10: {filename}")
-            
-            if i < 9:
-                time.sleep(1)
-        
-        print("Acquisizione completata!")
-        self.capturing = False
-    
-    @staticmethod
-    def get_char():
-        """Legge un singolo carattere da terminale"""
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            return sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                self.get_logger().info(f"Saved {i+1}/10: {filename}")
+            time.sleep(1)
 
-def main():
-    rclpy.init()
-    image_capture = ImageCapture()
-    
-    def keyboard_handler():
-        try:
-            while rclpy.ok():
-                if select.select([sys.stdin], [], [], 0.1)[0]:
-                    char = image_capture.get_char().lower()
-                    if char == 'b':
-                        threading.Thread(target=image_capture.capture_sequence, daemon=True).start()
-                    elif char == 'q':
-                        rclpy.shutdown()
-                        return
-                time.sleep(0.1)
-        except KeyboardInterrupt:
-            rclpy.shutdown()
-    
-    threading.Thread(target=keyboard_handler, daemon=True).start()
-    
+        self.get_logger().info("Image capture completed.")
+        self.capturing = False
+        
+def main(args=None):
+    rclpy.init(args=args)
+    node = ImageCapture()
     try:
-        rclpy.spin(image_capture)
-    except Exception as e:
-        print(f"Errore: {e}")
-    finally:
-        if rclpy.ok():
-            rclpy.shutdown()
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
+
+# ros2 topic pub --once /capture_trigger std_msgs/Bool "data: true"

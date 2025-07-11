@@ -10,8 +10,17 @@ def generate_launch_description():
         name='image_capture_node',
         output='screen'
     )
+    #detection.py node
+    detection_node = Node(
+        package='dr_vision',
+        executable='detection.py',  
+        name='object_detection_node',
+        output='screen',   
+    )
     
     return LaunchDescription([
-        # build_test,
-        
+        # build_test, #not possible to save in right folder using ros2
+        detection_node
     ])
+    
+    #ros2 run teleop_twist_keyboard teleop_twist_keyboard

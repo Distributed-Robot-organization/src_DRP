@@ -44,7 +44,7 @@ def generate_launch_description():
         }.items()
     )
 
-    nav2_params_path = os.path.join(pkg_dir, 'config', 'nav2_params.yaml')
+    nav2_params_path = os.path.join(pkg_dir, 'nav2_params.yaml')
 
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([

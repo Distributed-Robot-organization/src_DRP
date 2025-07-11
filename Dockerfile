@@ -35,6 +35,18 @@ RUN apt-get update && \
     ros-humble-topic-tools && \
     rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install pyserial \
+    flask \
+    flask-ask-sdk \
+    ask-sdk \
+    notebook \
+    ultralytics \
+    pyyaml \
+    xmlschema
+    
+RUN pip3 install "numpy<2"
+# Downgrade NumPy to fix compatibility issues with cv_bridge etc.
+RUN pip3 install "numpy<2"
 # Create the workspace directory
 RUN mkdir -p /ros2_ws
 
