@@ -47,7 +47,7 @@ RUN pip3 install pyserial \
 # Downgrade NumPy to fix compatibility issues with cv_bridge etc.
 RUN pip3 install "numpy<2"
 
-RUN pip3 install open3d
+# RUN pip3 install open3d
 # Create the workspace directory
 RUN mkdir -p /ros2_ws
 
@@ -70,3 +70,7 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc && \
 
 # Default command to run when the container starts
 CMD ["bash"]
+
+# to mantain ros domain id in your pc copy this inside bashrc: 
+# gedit ~/.bashrc
+# export ROS_DOMAIN_ID=42
