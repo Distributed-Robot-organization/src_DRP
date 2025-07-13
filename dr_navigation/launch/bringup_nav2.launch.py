@@ -10,12 +10,12 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     # Declare launch arguments
     
-    pkg_dir = get_package_share_directory('dr_nav2')
+    pkg_dir = get_package_share_directory('dr_navigation')
     default_map_path = os.path.join(pkg_dir, 'maps', 'map_slam_2', 'plane_2.yaml')
 
     map_arg = DeclareLaunchArgument(
         'map',
-        default_value='./src_DRP/dr_nav2/maps/map_slam_2/plane_2.yaml',
+        default_value='./src_DRP/dr_navigation/maps/map_slam_2/plane_2.yaml',
         description='Full path to map yaml'
     )
     use_sim_time_arg = DeclareLaunchArgument(

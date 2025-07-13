@@ -39,6 +39,8 @@ install(
 install(PROGRAMS
   dr_vision/build_dataset.py
   dr_vision/detection.py
+  dr_vision/detection_pcl.py
+  dr_vision/yolo_pcl.py
   DESTINATION lib/${PROJECT_NAME}
 )
 ament_package()

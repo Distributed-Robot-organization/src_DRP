@@ -36,7 +36,7 @@ def generate_launch_description():
                 
         # include('dr_vision', 'dr_vision.launch.py', delay=2.0),
 
-        include('dr_nav2', 'bringup_nav2.launch.py', delay=4.0),
+        include('dr_navigation', 'bringup_nav2.launch.py', delay=4.0),
         
 
     ])

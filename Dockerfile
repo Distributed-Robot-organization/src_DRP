@@ -44,9 +44,10 @@ RUN pip3 install pyserial \
     pyyaml \
     xmlschema
     
-RUN pip3 install "numpy<2"
 # Downgrade NumPy to fix compatibility issues with cv_bridge etc.
 RUN pip3 install "numpy<2"
+
+RUN pip3 install open3d
 # Create the workspace directory
 RUN mkdir -p /ros2_ws
 

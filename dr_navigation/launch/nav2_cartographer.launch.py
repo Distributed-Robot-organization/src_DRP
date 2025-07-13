@@ -11,7 +11,7 @@ def generate_launch_description():
     slam_toolbox_launch_dir = os.path.join(
         get_package_share_directory('slam_toolbox'), 'launch')
     
-    pkg_dir = get_package_share_directory('dr_nav2')
+    pkg_dir = get_package_share_directory('dr_navigation')
     params_file = LaunchConfiguration('params_file')
     use_sim_time = LaunchConfiguration('use_sim_time')
 

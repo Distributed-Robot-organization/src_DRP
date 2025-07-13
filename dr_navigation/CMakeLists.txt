@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(dr_nav2)
+project(dr_navigation)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -19,7 +19,7 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 install(PROGRAMS
-  dr_nav2/initial_pose_publisher.py
+  dr_navigation/initial_pose_publisher.py
   DESTINATION lib/${PROJECT_NAME}
 )
 if(BUILD_TESTING)

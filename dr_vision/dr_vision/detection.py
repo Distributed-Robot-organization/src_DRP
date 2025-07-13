@@ -36,6 +36,18 @@ class ObjectDetectionNode(Node):
     def __init__(self) -> None:
         super().__init__('object_detection_node')
         
+        # Declare parameters for topic names
+        self.declare_parameter('rgb_image_topic', 'camera/image_raw')
+        self.declare_parameter('depth_image_topic', 'camera/depth/image_raw')
+        self.declare_parameter('detection_image_topic', 'dr_vision/yolo_detection_image')
+        self.declare_parameter('detection_results_topic', 'dr_vision/yolo_detection_results')
+        
+        # Get parameter values
+        rgb_topic = self.get_parameter('rgb_image_topic').get_parameter_value().string_value
+        depth_topic = self.get_parameter('depth_image_topic').get_parameter_value().string_value
+        detection_image_topic = self.get_parameter('detection_image_topic').get_parameter_value().string_value
+        detection_results_topic = self.get_parameter('detection_results_topic').get_parameter_value().string_value
+        
         # QoS settings for the subscriptions
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
@@ -48,12 +60,7 @@ class ObjectDetectionNode(Node):
         model_path = os.path.join(package_share_directory, 'models', 'best.pt')
         self.model = YOLO(model_path)
         
-        #subscribe to RGB and depth images
-        self.declare_parameter("rgb_image_topic", "camera/image_raw")
-        self.declare_parameter("depth_image_topic", "camera/depth/image_raw")
-        rgb_topic = self.get_parameter("rgb_image_topic").get_parameter_value().string_value
-        depth_topic = self.get_parameter("depth_image_topic").get_parameter_value().string_value
-
+        #subscribe to RGB and depth images using parameters
         self.rgb_subscription = self.create_subscription(
             Image,
             rgb_topic,
@@ -66,13 +73,12 @@ class ObjectDetectionNode(Node):
             self.depth_callback,
             qos_profile
         )
-
         
-        #publish the detection results
-        self.image_publisher = self.create_publisher(Image, 'dr_vision/yolo_detection_image', 1)
+        #publish the detection results using parameters
+        self.image_publisher = self.create_publisher(Image, detection_image_topic, 1)
         self.detection_publisher = self.create_publisher(
             ObjectDetectionResult,
-            'dr_vision/yolo_detection_results',
+            detection_results_topic,
             1
         )
         #publish the TF frames
