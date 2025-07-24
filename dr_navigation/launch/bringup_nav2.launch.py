@@ -15,7 +15,7 @@ def generate_launch_description():
 
     map_arg = DeclareLaunchArgument(
         'map',
-        default_value='./src_DRP/dr_navigation/maps/map_slam_2/plane_2.yaml',
+        default_value=default_map_path,
         description='Full path to map yaml'
     )
     use_sim_time_arg = DeclareLaunchArgument(

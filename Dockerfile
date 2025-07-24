@@ -40,10 +40,10 @@ RUN pip3 install pyserial \
     flask-ask-sdk \
     ask-sdk \
     notebook \
-    ultralytics \
     pyyaml \
     xmlschema
-    
+
+# RUN pip3 install ultralytics
 # Downgrade NumPy to fix compatibility issues with cv_bridge etc.
 RUN pip3 install "numpy<2"
 
