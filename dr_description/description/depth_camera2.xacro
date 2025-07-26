@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
+    <xacro:macro name="depth_camera2" params="robot_namespace:=''">
+
     <joint name="scanner_joint" type="fixed">
         <parent link="chassis"/>
         <child link="scanner_link"/>
@@ -47,11 +49,16 @@
                 </clip>
             </camera>
             <plugin name="scanner_controller" filename="libgazebo_ros_camera.so">
+                <ros>
+                    <namespace>${robot_namespace}</namespace>
+                </ros>
                 <frame_name>scanner_link_optical</frame_name>
                 <min_depth>0.1</min_depth>
                 <max_depth>100.0</max_depth>
             </plugin>
         </sensor>
     </gazebo>
+
+    </xacro:macro>
 
 </robot>

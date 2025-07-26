@@ -8,15 +8,20 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
+
 def load_initial_pose_from_yaml():
-    config_pkg_path = get_package_share_directory('dr_configurations')
-    yaml_path = os.path.join(config_pkg_path, 'robottino_behavior.yaml')
+    config_pkg_path = get_package_share_directory('dr_description')
+    yaml_path = os.path.join(config_pkg_path, 'config', 'minions_params.yaml')
     
     with open(yaml_path, 'r') as file:
         data = yaml.safe_load(file)
-    
-    pose = data.get('initial_pose', {})
-    return str(pose.get('x', 0.0)), str(pose.get('y', 0.0)), str(pose.get('yaw', 0.0))
+        
+    robots = data.get('/**', {}).get('ros__parameters', {}).get('robots', [])
+    if robots:
+        first_robot = robots[0]
+        return str(first_robot.get('x', 1.0)), str(first_robot.get('y', 1.0)), str(first_robot.get('yaw', 0.0))
+    else:
+        return "1.0", "1.0", "0.0"
 
 
 def generate_launch_description():
@@ -25,18 +30,13 @@ def generate_launch_description():
     
     x_pose, y_pose, yaw = load_initial_pose_from_yaml()
 
-    world = os.path.join(
-        get_package_share_directory(package_name),
-        'worlds',
-        'plane_2.world'
-    )
 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(
                 get_package_share_directory(package_name),
                 'launch',
-                'rsp.launch.py'
+                'single_rsp.launch.py'
             )
         ]),
         launch_arguments={
@@ -57,31 +57,12 @@ def generate_launch_description():
         remappings=[('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')]
     )
 
-    gazebo_params_file = os.path.join(
-        get_package_share_directory(package_name),
-        'config',
-        'gazebo_params.yaml'
-    )
-
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(
-                get_package_share_directory('gazebo_ros'),
-                'launch',
-                'gazebo.launch.py')
-        ]),
-        launch_arguments={
-            'world': world,
-            'extra_gazebo_args': '--ros-args --params-file ' + gazebo_params_file
-        }.items()
-    )
-
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         arguments=[
             '-topic', 'robot_description',
-            '-entity', 'my_bot',
+            '-entity', 'minion',
             '-x', x_pose,
             '-y', y_pose,
             '-z', '0.01'
@@ -104,7 +85,6 @@ def generate_launch_description():
     return LaunchDescription([
         rsp,
         twist_mux,
-        gazebo,
         spawn_entity,
         diff_drive_spawner,
         joint_broad_spawner,

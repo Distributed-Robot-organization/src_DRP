@@ -1,22 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:macro name="gazebo_control" params="robot_namespace:=''">
-
-    <xacro:if value="${robot_namespace != ''}">
-        <xacro:property name="odom_frame" value="${robot_namespace}/odom"/>
-        <xacro:property name="base_frame" value="${robot_namespace}/base_link"/>
-    </xacro:if>
-    <xacro:unless value="${robot_namespace != ''}">
-        <xacro:property name="odom_frame" value="odom"/>
-        <xacro:property name="base_frame" value="base_link"/>
-    </xacro:unless>
-
     <gazebo>
         <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
-            <ros>
-                <namespace>${robot_namespace}</namespace>
-            </ros>
 
             <!-- Wheel Information -->
             <left_joint>left_wheel_joint</left_joint>
@@ -31,8 +17,8 @@
 
             
             <!-- Output -->
-            <odometry_frame>${odom_frame}</odometry_frame>
-            <robot_base_frame>${base_frame}</robot_base_frame>
+            <odometry_frame>odom</odometry_frame>
+            <robot_base_frame>base_link</robot_base_frame>
 
             <publish_odom>true</publish_odom>
             <publish_odom_tf>true</publish_odom_tf>
@@ -41,6 +27,5 @@
         </plugin>
     </gazebo>
 
-    </xacro:macro>
 
 </robot>

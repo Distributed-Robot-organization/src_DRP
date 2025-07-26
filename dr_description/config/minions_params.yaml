@@ -1,0 +1,38 @@
+
+/**:
+  ros__parameters:
+    map: "plane_2" # Maps can be "test_world" or "plane_2"
+    robots:
+      - name: robot1
+        x: 1.
+        y: 1.
+        yaw: 0.0
+      - name: robot2
+        x: 2.0
+        y: 1.0
+        yaw: 0.0
+      - name: robot3
+        x: 3.0
+        y: 1.0
+        yaw: 0.0
+
+    qos_overrides:
+      /parameter_events:
+        publisher:
+          depth: 1000
+          durability: transient_local
+          history: keep_last
+          reliability: reliable
+
+    topics:
+      filtered_pcl: "filtered_pcl"
+      cluster_pose: "c_position"
+      cluster_pcl: "cluster_pcl"
+      cluster_centroid: "median"
+      voxel_estimate: "voxel_estimate"
+
+    filter_params:
+      voxel_leaf_size: 0.05
+          
+    minion_additions:
+      max_camera_depth: 8.0

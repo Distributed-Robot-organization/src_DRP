@@ -2,139 +2,130 @@ import os
 import yaml
 
 from ament_index_python.packages import get_package_share_directory
+
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch.substitutions import PythonExpression
 
 
-def start_minions():
-    nodes = []
-
+def load_robots_from_yaml():
     config_pkg_path = get_package_share_directory('dr_description')
-    yaml_path = os.path.join(config_pkg_path,'config' , 'minions_params_file.yaml')
-
+    yaml_path = os.path.join(config_pkg_path, 'config', 'minions_params.yaml')
+    
     with open(yaml_path, 'r') as file:
-        raw_yaml = yaml.safe_load(file)
-        minions_params_file = raw_yaml["/**"]["ros__parameters"]
-
-        for i in range(len(minions_params_file['init_names'])):
-            minion_name = minions_params_file['init_names'][i]
-            minion_pose_x = minions_params_file['init_x'][i]
-            minion_pose_y = minions_params_file['init_y'][i]
-            minion_pose_yaw = minions_params_file['init_yaw'][i]
-
-            print(f"Spawning {minion_name} at ({minion_pose_x}, {minion_pose_y}, {minion_pose_yaw})")
-
-            # Include rsp launch filez
-            rsp = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([
-                    os.path.join(
-                        config_pkg_path,
-                        'launch',
-                        'multi_rsp.launch.py'
-                    )
-                ]),
-                launch_arguments={
-                    'use_sim_time': 'true',
-                    'minion_name': minion_name,
-                    'use_ros2_control': 'true'
-                }.items()
-            )
-
-            # Spawning in Gazebo
-            spawn_entity = Node(
-                package='gazebo_ros',
-                executable='spawn_entity.py',
-                arguments=[
-                    '-topic', PythonExpression(["'/", minion_name, "/robot_description", "'"]),
-                    '-entity', minion_name,
-                    '-robot_namespace', minion_name,
-                    '-x', PythonExpression(["'", str(minion_pose_x), "'"]),
-                    '-y', PythonExpression(["'", str(minion_pose_y), "'"]),
-                    '-z', '0.0',
-                    '-Y', PythonExpression(["'", str(minion_pose_yaw), "'"]),
-                ],
-                output='screen'
-            )
-
-            # Controller spawner (opzionale)
-            diff_drive_spawner = Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["diff_cont", "--robot_namespace", minion_name],
-                namespace=minion_name
-            )
-
-            joint_broad_spawner = Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["joint_broad", "--robot_namespace", minion_name],
-                namespace=minion_name
-            )
-
-            # Twist mux (global)
-            twist_mux_params = os.path.join(
-                config_pkg_path,
-                'config',
-                'twist_mux.yaml'
-            )
-
-            twist_mux = Node(
-                package="twist_mux",
-                executable="twist_mux",
-                parameters=[twist_mux_params, {'use_sim_time': True}],
-                remappings=[('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')],
-                namespace=minion_name
-            )
-
-            nodes += [
-                rsp, 
-                spawn_entity, 
-                diff_drive_spawner, 
-                joint_broad_spawner,
-                twist_mux
-            ]
-
-    return nodes
+        data = yaml.safe_load(file)
+        
+    robots = data.get('/**', {}).get('ros__parameters', {}).get('robots', [])
+    return robots if robots else [{'name': 'robot1', 'x': 1.0, 'y': 1.0, 'yaw': 0.0}]
 
 
-def generate_launch_description():   
-
-    config_pkg_path = get_package_share_directory('dr_description')
-
-    # World path
-    world = os.path.join(
-        config_pkg_path,
-        'worlds',
-        'empty.world'
-    )
-
-    # Gazebo params
-    gazebo_params_file = os.path.join(
-        config_pkg_path,
+def generate_launch_description():
+    package_name = 'dr_description'
+    robots = load_robots_from_yaml()
+    twist_mux_params = os.path.join(
+        get_package_share_directory(package_name),
         'config',
-        'gazebo_params.yaml'
+        'twist_mux.yaml'
     )
+    
+    launch_nodes = []
+    
 
-    # Launch Gazebo
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(
-                get_package_share_directory('gazebo_ros'),
-                'launch',
-                'gazebo.launch.py')
-        ]),
-        launch_arguments={
-            'world': world,
-            'extra_gazebo_args': '--ros-args --params-file ' + gazebo_params_file
-        }.items()
-    )
+    # Crea un robot state publisher per ogni robot con namespace
+    for robot in robots:
+        robot_name = robot.get('name', 'robot1')
+        x    = str(robot.get('x',   1.0))
+        y    = str(robot.get('y',   1.0))
+        yaw  = str(robot.get('yaw', 0.0))
+        
+        rsp = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                os.path.join(
+                    get_package_share_directory(package_name),
+                    'launch',
+                    'multi_rsp.launch.py'
+                )
+            ]),
+            launch_arguments={
+                'use_sim_time': 'true',
+                'use_ros2_control': 'false',  # Use gazebo_control instead for multi-robot
+                'namespace': robot_name
+            }.items()
+        )
+        
+        # Spawn entity per ogni robot
+        print(f"Spawning {robot_name} at x={robot.get('x')}, y={robot.get('y')}, yaw={robot.get('yaw')}")
+        twist_mux = Node(
+                    package    = 'twist_mux',
+                    executable = 'twist_mux',
+                    name=f'{robot_name}_twist_mux',
+                    namespace  = robot_name,
+                    parameters = [twist_mux_params, {'use_sim_time': True}],
+                    remappings = [('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')]
+                )
+        
+        spawn_entity = Node(
+            package='gazebo_ros',
+            executable='spawn_entity.py',
+            name=f'{robot_name}_spawn_entity',
+            arguments=[
+                '-topic', f'{robot_name}/robot_description',
+                '-entity', robot_name,
+                '-x', str(robot.get('x', 1.0)),
+                '-y', str(robot.get('y', 1.0)),
+                '-z', '0.01',
+                '-Y', str(robot.get('yaw', 0.0))
+            ],
+            output='screen'
+        )
+        control_params = os.path.join(
+            get_package_share_directory(package_name),
+            'config',
+            'my_controllers.yaml'  # <-- assicurati che esista
+        )
 
-    minions_nodes = start_minions()
+        controller_manager_node = Node(
+            package='controller_manager',
+            executable='ros2_control_node',
+            name=f'{robot_name}_controller_manager',
+            namespace=robot_name,
+            parameters=[
+                {'use_sim_time': True},
+                control_params
+            ],
+            output='screen'
+        )
+        
+        diff_drive_spawner = Node(
+            package    = 'controller_manager',
+            executable = 'spawner',
+            name=f'{robot_name}_diff_drive_spawner',
+            namespace  = robot_name,
+            arguments  = [
+                'diff_cont',
+                '-c', f'/{robot_name}/controller_manager'   # controller_manager namespaced
+            ]
+        )
 
-    return LaunchDescription([
-        gazebo,
-        *minions_nodes
-    ])
+        joint_broad_spawner = Node(
+            package    = 'controller_manager',
+            executable = 'spawner',
+            name=f'{robot_name}_joint_broad_spawner',
+            namespace  = robot_name,
+            arguments  = [
+                'joint_broad',
+                '-c', f'/{robot_name}/controller_manager'
+            ]
+        )
+        launch_nodes.extend([
+            rsp,
+            twist_mux,
+            spawn_entity,
+            controller_manager_node, 
+            joint_broad_spawner,
+            diff_drive_spawner
+            ])
+
+    return LaunchDescription(launch_nodes)
+
