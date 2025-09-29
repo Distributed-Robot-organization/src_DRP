@@ -47,7 +47,10 @@
                 </clip>
             </camera>
             <plugin name="scanner_controller" filename="libgazebo_ros_camera.so">
-                <frame_name>scanner_link_optical</frame_name>
+                <ros>
+                    <namespace>$(arg robot_namespace)</namespace>
+                </ros>
+                <frame_name>$(arg robot_namespace)/scanner_link_optical</frame_name>
                 <min_depth>0.1</min_depth>
                 <max_depth>100.0</max_depth>
             </plugin>

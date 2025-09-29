@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:unless value="$(arg sim_mode)">
-        <ros2_control name="RealRobot" type="system">
+        <ros2_control name="$(arg robot_namespace)_RealRobot" type="system">
             <hardware>
                 <plugin>diffdrive_arduino/DiffDriveArduinoHardware</plugin>
                 <param name="left_wheel_name">left_wheel_joint</param>
@@ -33,7 +33,7 @@
     </xacro:unless>
 
     <xacro:if value="$(arg sim_mode)">
-        <ros2_control name="GazeboSystem" type="system">
+        <ros2_control name="$(arg robot_namespace)_GazeboSystem" type="system">
             <hardware>
                 <plugin>gazebo_ros2_control/GazeboSystem</plugin>
             </hardware>
@@ -58,8 +58,13 @@
 
     <gazebo>
         <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+            <robot_param>robot_description</robot_param>
+            <robot_param_node>$(arg robot_namespace)</robot_param_node>
             <parameters>$(find dr_description)/config/my_controllers.yaml</parameters>
             <parameters>$(find dr_description)/config/gaz_ros2_ctl_use_sim.yaml</parameters>
+            <ros>
+                <namespace>$(arg robot_namespace)</namespace>
+            </ros>
         </plugin>
     </gazebo>
 
