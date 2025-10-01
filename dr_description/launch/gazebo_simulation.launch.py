@@ -6,6 +6,8 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PythonExpression
+
 from launch_ros.actions import Node
 
 def load_initial_pose_from_yaml():
@@ -21,6 +23,8 @@ def load_initial_pose_from_yaml():
 
 def generate_launch_description():
     package_name = 'dr_description'
+    robot_name = LaunchConfiguration('robot_name', default='pollo')
+
 
     
     x_pose, y_pose, yaw = load_initial_pose_from_yaml()
@@ -40,6 +44,7 @@ def generate_launch_description():
             )
         ]),
         launch_arguments={
+            "robot_name": robot_name,
             'use_sim_time': 'true',
             'use_ros2_control': 'true'
         }.items()
@@ -50,9 +55,11 @@ def generate_launch_description():
         'config',
         'twist_mux.yaml'
     )
+    
     twist_mux = Node(
         package="twist_mux",
         executable="twist_mux",
+        namespace = robot_name,
         parameters=[twist_mux_params, {'use_sim_time': True}],
         remappings=[('/cmd_vel_out', '/diff_cont/cmd_vel_unstamped')]
     )
@@ -79,9 +86,11 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
+        namespace = robot_name,
         arguments=[
-            '-topic', 'robot_description',
-            '-entity', 'my_bot',
+            '-robot_namespace', robot_name,
+            '-topic',PythonExpression(["'/", robot_name, "/robot_description", "'"]),
+            '-entity', robot_name,
             '-x', x_pose,
             '-y', y_pose,
             '-z', '0.01'
@@ -92,12 +101,14 @@ def generate_launch_description():
     diff_drive_spawner = Node(
         package="controller_manager",
         executable="spawner",
+        namespace = robot_name,
         arguments=["diff_cont"]
     )
 
     joint_broad_spawner = Node(
         package="controller_manager",
         executable="spawner",
+        namespace = robot_name,
         arguments=["joint_broad"]
     )
 

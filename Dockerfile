@@ -32,6 +32,12 @@ RUN apt-get update && \
     ros-humble-robot-state-publisher \
     ros-humble-gazebo-ros2-control \
     ros-humble-ros2-controllers \
+    ros-humble-rmw-cyclonedds-cpp\
+    ros-humble-rtabmap-*\
+    ros-humble-pcl-*\
+    python3-shapely\
+    libcpl-dev\
+    gdb\
     ros-humble-topic-tools && \
     rm -rf /var/lib/apt/lists/*
 
@@ -67,6 +73,13 @@ WORKDIR /ros2_ws
 # Source the ROS 2 setup script in the user's bashrc
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc && \
     echo "source /usr/share/gazebo/setup.sh" >> ~/.bashrc
+RUN echo 'alias refresh="source install/setup.bash"' >> ~/.bash_aliases
+RUN echo 'alias build="colcon build --symlink-install && source install/setup.bash"' >> ~/.bash_aliases
+RUN echo 'clean_build(){\
+    rm -rf build install log \
+    build\
+    }\
+    ' >> ~/.bash_aliases
 
 # Default command to run when the container starts
 CMD ["bash"]

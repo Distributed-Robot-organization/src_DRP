@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="wheel_box">
+    <xacro:arg name="robot_name" default="X" />
+    <xacro:arg name="use_ros2_control" default="true" />
+    <xacro:arg name="sim_mode" default="false" />
+
+    <xacro:macro name="wheel_box" params='robot_name sim_mode use_ros2_control'>
+
+        <xacro:include filename="wheel_box/robot_core.xacro" />
+
+        <xacro:if value="$(arg use_ros2_control)">
+            <xacro:include filename="wheel_box/ros2_control.xacro" />
+        </xacro:if>
+        <xacro:unless value="$(arg use_ros2_control)">
+            <xacro:include filename="wheel_box/gazebo_control.xacro" />
+        </xacro:unless>
+        <xacro:include filename="wheel_box/lidar.xacro" />
+        <!-- <xacro:include filename="camera.xacro" /> -->
+        <xacro:include filename="wheel_box/depth_camera.xacro" />
+        <xacro:include filename="wheel_box/depth_camera2.xacro" />
+
+        <!-- <xacro:include filename="face.xacro" /> -->
+    </xacro:macro>
+    <xacro:wheel_box robot_name="$(arg robot_name)" sim_mode="$(arg sim_mode)" use_ros2_control="$(arg use_ros2_control)" />
+
+</robot>

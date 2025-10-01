@@ -6,6 +6,8 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
+    robot_name = LaunchConfiguration('robot_name', default='X')
+
     urdf_file = PathJoinSubstitution([
         FindPackageShare('dr_description'),
         'description',
