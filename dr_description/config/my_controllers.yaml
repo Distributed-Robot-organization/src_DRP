@@ -24,6 +24,8 @@
 /pollo:
   diff_cont:
     ros__parameters:
+      base_frame_id: pollo/base_link
+      odom_frame_id: pollo/odom
       left_wheel_names: ['pollo/left_wheel_joint']
       right_wheel_names: ['pollo/right_wheel_joint']
 
