@@ -1,5 +1,5 @@
 # initial pose of only one robot
 initial_pose:
   x: 1.0
-  y: 4.50
-  yaw: 1.57  # in radianti
+  y: 1.0
+  yaw: 1.0  # in radianti
