@@ -37,7 +37,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     robot_name = LaunchConfiguration('robot_name', default='pollo')
     map_file = LaunchConfiguration('map_file', default=os.path.join(dr_nav2_dir, 'maps', 'plane_2.yaml'))
-    nav2_params_file = LaunchConfiguration('nav2_params_file', default=os.path.join(dr_nav2_dir, 'config', 'nav2_params.yaml'))
+    nav2_params_file = LaunchConfiguration('nav2_params_file', default=os.path.join(dr_nav2_dir, 'nav2_params.yaml'))
     rviz_config_file = LaunchConfiguration('rviz_config_file', default=os.path.join(dr_nav2_dir, 'rviz', 'nav2_default_view.rviz'))
     nav2_autostart = LaunchConfiguration('nav2_autostart', default='true')
     use_rviz = LaunchConfiguration('use_rviz', default='true')
